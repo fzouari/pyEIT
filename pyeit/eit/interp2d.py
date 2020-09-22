@@ -472,22 +472,6 @@ def demo():
     # 2. interpolate using averaged neighbor triangle area
     perm_node = sim2pts(pts, tri, mesh_new['perm'])
 
-    # plot mesh and interpolated mesh (tri2pts)
-    fig_size = (6, 4)
-    fig = plt.figure(figsize=fig_size)
-    ax = fig.add_subplot(111)
-    ax.set_aspect('equal')
-    ax.triplot(pts[:, 0], pts[:, 1], tri)
-    im1 = ax.tripcolor(pts[:, 0], pts[:, 1], tri, mesh_new['perm'])
-    fig.colorbar(im1, orientation='vertical')
-
-    fig = plt.figure(figsize=fig_size)
-    ax2 = fig.add_subplot(111)
-    ax2.set_aspect('equal')
-    ax2.triplot(pts[:, 0], pts[:, 1], tri)
-    im2 = ax2.tripcolor(pts[:, 0], pts[:, 1], tri, perm_node, shading='flat')
-    fig.colorbar(im2, orientation='vertical')
-
     # 3. interpolate on grids (irregular or regular) using IDW, sigmod
     xg, yg, mask = meshgrid(pts)
     im = np.ones_like(mask)
@@ -498,16 +482,35 @@ def demo():
     w_mat = weight_sigmod(xy, xyi)
     im = np.dot(w_mat.T, mesh_new['perm'])
     # im = weight_linear_rbf(xy, xyi, mesh_new['perm'])
+    w_mat_T_inv = np.linalg.pinv(w_mat.T)
+    mesh_new_r = np.dot(w_mat_T_inv, im)
     im[mask] = 0.
     # reshape to grid size
     im = im.reshape(xg.shape)
 
+    # plot mesh and interpolated mesh (tri2pts)
+    fig, axs = plt.subplots(1, 3)
+    ax1, ax2, ax3 = axs[0], axs[1], axs[2]
+
+    ax1.set_aspect('equal')
+    ax1.triplot(pts[:, 0], pts[:, 1], tri)
+    im1 = ax1.tripcolor(pts[:, 0], pts[:, 1], tri, mesh_new['perm'])
+
+    ax2.set_aspect('equal')
+    ax2.triplot(pts[:, 0], pts[:, 1], tri)
+    im2 = ax2.tripcolor(pts[:, 0], pts[:, 1], tri, perm_node, shading='flat')
+
     # plot interpolated values
-    fig, ax = plt.subplots(figsize=fig_size)
+    ax3.set_aspect('equal')
+    ax3.triplot(pts[:, 0], pts[:, 1], tri, alpha=0.5)
+    im3 = ax3.pcolor(xg, yg, im, edgecolors=None, linewidth=0, alpha=0.8)
+
+    _, ax = plt.subplots(1)
     ax.set_aspect('equal')
-    ax.triplot(pts[:, 0], pts[:, 1], tri, alpha=0.5)
-    im3 = ax.pcolor(xg, yg, im, edgecolors=None, linewidth=0, alpha=0.8)
-    fig.colorbar(im3, orientation='vertical')
+    ax.triplot(pts[:, 0], pts[:, 1], tri)
+    im4 = ax.tripcolor(pts[:, 0], pts[:, 1], tri, mesh_new_r)  # , cmap='binary_r', binary, binary_r
+
+
     plt.show()
 
 
