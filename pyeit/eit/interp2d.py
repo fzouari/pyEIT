@@ -482,11 +482,13 @@ def demo():
     w_mat = weight_sigmod(xy, xyi)
     im = np.dot(w_mat.T, mesh_new['perm'])
     # im = weight_linear_rbf(xy, xyi, mesh_new['perm'])
-    w_mat_T_inv = np.linalg.pinv(w_mat.T)
-    mesh_new_r = np.dot(w_mat_T_inv, im)
     im[mask] = 0.
     # reshape to grid size
     im = im.reshape(xg.shape)
+    # Inverse mapping
+    # w_mat_T_inv = np.linalg.pinv(w_mat.T)
+    w_mat_T_inv = w_mat
+    mesh_new_r = np.dot(w_mat_T_inv, im)
 
     # plot mesh and interpolated mesh (tri2pts)
     fig, axs = plt.subplots(1, 3)
