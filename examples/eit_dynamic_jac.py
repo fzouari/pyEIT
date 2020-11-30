@@ -13,6 +13,7 @@ from pyeit.eit.utils import eit_scan_lines
 
 import pyeit.eit.jac as jac
 from pyeit.eit.interp2d import sim2pts
+import pyeit.eit.jac_reg as jac_reg
 
 """ 0. construct mesh """
 mesh_obj, el_pos = mesh.create(16, h0=0.1)
@@ -29,7 +30,7 @@ anomaly = [{'x': 0.5, 'y': 0.5, 'd': 0.1, 'perm': 1000.0}]
 mesh_new = mesh.set_perm(mesh_obj, anomaly=anomaly)
 
 """ 2. FEM simulation """
-el_dist, step = 8, 1
+el_dist, step = 1, 1
 ex_mat = eit_scan_lines(16, el_dist)
 
 # calculate simulated data
@@ -44,9 +45,10 @@ f1 = fwd.solve_eit(ex_mat, step=step, perm=mesh_new['perm'])
 # (mostly) the shape and the electrode positions are not exactly the same
 # as in mesh generating the jac, then JAC and data must be normalized.
 eit = jac.JAC(mesh_obj, el_pos, ex_mat=ex_mat, step=step,
-              perm=1., parser='std', jac_normalized=False)
+              perm=1., parser='fmmu', jac_normalized=False)
 eit.setup(p=0.5, lamb=0.01, method='kotre')
-ds = eit.solve(f1.v, f0.v, normalize=True)
+# ds = eit.solve(f1.v, f0.v, normalize=True)
+ds = eit.solve(f1.v, f0.v, normalize=False)
 ds_n = sim2pts(pts, tri, np.real(ds))
 
 # plot ground truth
@@ -66,3 +68,13 @@ ax.set_aspect('equal')
 # fig.set_size_inches(6, 4)
 # plt.savefig('../figs/demo_jac.png', dpi=96)
 plt.show()
+
+'''Plot Jacobian matrix'''
+# Jac = eit.J
+# for i in range(Jac.shape[0]):
+#     fig, ax = plt.subplots(figsize=(6, 4))
+#     im = ax.tripcolor(x, y, tri, np.real(Jac[i, :]), shading='flat')
+#     fig.colorbar(im)
+#     ax.set_aspect('equal')
+#     plt.show()
+
