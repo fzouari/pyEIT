@@ -28,7 +28,7 @@ perm = mesh_new['perm']
 
 """ 1. FEM forward simulations """
 # setup EIT scan conditions
-ex_dist, step = 7, 1
+ex_dist, step = 1, 1
 ex_mat = eit_scan_lines(16, ex_dist)
 ex_line = ex_mat[0].ravel()
 
