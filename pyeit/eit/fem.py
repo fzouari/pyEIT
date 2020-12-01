@@ -14,7 +14,7 @@ from scipy import sparse
 from .utils import eit_scan_lines
 
 
-class Forward(object):
+class Forward:
     """ FEM forward computing code """
 
     def __init__(self, mesh, el_pos):
@@ -28,15 +28,19 @@ class Forward(object):
             mesh structure, {'node', 'element', 'perm'}
         el_pos: NDArray
             numbering of electrodes positions
-            
+
         Note
         ----
-        the nodes are continuous numbered, the numbering of an element is
+        1, The nodes are continuous numbered, the numbering of an element is
         CCW (counter-clock-wise).
+        2, The Jacobian and the boundary voltages used the SIGN information,
+        for example, V56 = V6 - V5 = -V65. If you are using absolute boundary
+        voltages for imaging, you MUST normalize it with the signs of v0
+        under each current-injecting pattern.
         """
-        self.pts = mesh['node']
-        self.tri = mesh['element']
-        self.tri_perm = mesh['perm']
+        self.pts = mesh["node"]
+        self.tri = mesh["element"]
+        self.tri_perm = mesh["perm"]
         self.el_pos = el_pos
 
         # reference electrodes [ref node should not be on electrodes]
@@ -63,10 +67,7 @@ class Forward(object):
         perm: NDArray
             Mx1 array, initial x0. must be the same size with self.tri_perm
         parser: str
-            if parser is 'fmmu', within each stimulation pattern, diff_pairs
-            or boundary measurements are re-indexed and started
-            from the positive stimulus electrode
-            if parser is 'std', subtract_row start from the 1st electrode
+            see voltage_meter for more details.
 
         Returns
         -------
@@ -117,19 +118,18 @@ class Forward(object):
             b_matrix.append(b)
 
         # update output, now you can call p.jac, p.v, p.b_matrix
-        pde_result = namedtuple("pde_result", ['jac', 'v', 'b_matrix'])
-        p = pde_result(jac=np.vstack(jac),
-                       v=np.hstack(v),
-                       b_matrix=np.vstack(b_matrix))
+        pde_result = namedtuple("pde_result", ["jac", "v", "b_matrix"])
+        p = pde_result(jac=np.vstack(jac), v=np.hstack(v), b_matrix=np.vstack(b_matrix))
         return p
 
     def solve(self, ex_line, perm):
         """
         with one pos (A), neg(B) driven pairs, calculate and
         compute the potential distribution (complex-valued)
-        
-        TODO: the calculation of Jacobian can be skipped.
-        TODO: handle CEM (complete electrode model)
+
+        The calculation of Jacobian can be skipped.
+        Currently, only simple electrode model is supported,
+        CEM (complete electrode model) is under development.
 
         Parameters
         ----------
@@ -180,8 +180,8 @@ class Forward(object):
 
         # global boundary condition
         b = np.zeros((self.n_pts, 1))
-        b[drv_a_global] = 1.
-        b[drv_b_global] = -1.
+        b[drv_a_global] = 1.0
+        b[drv_b_global] = -1.0
 
         return b
 
@@ -249,16 +249,23 @@ def voltage_meter(ex_line, n_el=16, step=1, parser=None):
     B: current sink,
     M, N: boundary electrodes, where v_diff = v_n - v_m.
 
+    'no_meas_current': (EIDORS3D)
+    mesurements on current carrying electrodes are discarded.
+
     Parameters
     ----------
     ex_line: NDArray
-        2x1 array, 0 for positive electrode, 1 for negative electrode
+        2x1 array, [positive electrode, negative electrode].
     n_el: int
-        number of electrodes
+        number of total electrodes.
     step: int
-        measurement method (which two electrodes are used for measuring)
+        measurement method (two adjacent electrodes are used for measuring).
     parser: str
-        if parser is 'fmmu', data are trimmed, start index (i) is always 'A'.
+        if parser is 'fmmu', or 'rotate_meas' then data are trimmed,
+        boundary voltage measurements are re-indexed and rotated,
+        start from the positive stimulus electrodestart index 'A'.
+        if parser is 'std', or 'no_rotate_meas' then data are trimmed,
+        the start index (i) of boundary voltage measurements is always 0.
 
     Returns
     -------
@@ -268,7 +275,7 @@ def voltage_meter(ex_line, n_el=16, step=1, parser=None):
     # local node
     drv_a = ex_line[0]
     drv_b = ex_line[1]
-    i0 = drv_a if parser == 'fmmu' else 0
+    i0 = drv_a if parser in ("fmmu", "rotate_meas") else 0
 
     # build differential pairs
     v = []
@@ -276,7 +283,7 @@ def voltage_meter(ex_line, n_el=16, step=1, parser=None):
         m = a % n_el
         n = (m + step) % n_el
         # if any of the electrodes is the stimulation electrodes
-        if not(m == drv_a or m == drv_b or n == drv_a or n == drv_b):
+        if not (m == drv_a or m == drv_b or n == drv_a or n == drv_b):
             # the order of m, n matters
             v.append([n, m])
 
@@ -321,13 +328,13 @@ def assemble(ke, tri, perm, n_pts, ref=0):
 
         no = tri[ei, :]
         ij = np.ix_(no, no)
-        k_global[ij] += (k_local * pe)
+        k_global[ij] += k_local * pe
 
     # place reference electrode
     if 0 <= ref < n_pts:
-        k_global[ref, :] = 0.
-        k_global[:, ref] = 0.
-        k_global[ref, ref] = 1.
+        k_global[ref, :] = 0.0
+        k_global[:, ref] = 0.0
+        k_global[ref, ref] = 1.0
 
     return k_global
 
@@ -378,17 +385,16 @@ def assemble_sparse(ke, tri, perm, n_pts, ref=0):
     # data = mask_ref_node(data, row, col, ref)
 
     # for efficient sparse inverse (csc)
-    A = sparse.csr_matrix((data, (row, col)),
-                          shape=(n_pts, n_pts), dtype=perm.dtype)
+    A = sparse.csr_matrix((data, (row, col)), shape=(n_pts, n_pts), dtype=perm.dtype)
 
     # the stiffness matrix may not be sparse
     A = A.toarray()
 
     # place reference electrode
     if 0 <= ref < n_pts:
-        A[ref, :] = 0.
-        A[:, ref] = 0.
-        A[ref, ref] = 1.
+        A[ref, :] = 0.0
+        A[:, ref] = 0.0
+        A[ref, ref] = 1.0
 
     return A
 
@@ -419,7 +425,7 @@ def calculate_ke(pts, tri):
     elif n_vertices == 4:
         _k_local = _k_tetrahedron
     else:
-        raise TypeError('The num of vertices of elements must be 3 or 4')
+        raise TypeError("The num of vertices of elements must be 3 or 4")
 
     # default data types for ke
     ke_array = np.zeros((n_tri, n_vertices, n_vertices))
@@ -455,20 +461,20 @@ def _k_triangle(xy):
     # s2 = xy[0, :] - xy[2, :]
     # s3 = xy[1, :] - xy[0, :]
 
-    # area of triangles
-    # TODO: remove abs, user must make sure all triangles are CCW.
+    # area of triangles. Note, abs is removed since version 2020,
+    # user must make sure all triangles are CCW (conter clock wised).
     # at = 0.5 * la.det(s[[0, 1]])
-    at = np.abs(0.5 * det2x2(s[0], s[1]))
+    at = 0.5 * det2x2(s[0], s[1])
 
     # (e for element) local stiffness matrix
-    ke_matrix = np.dot(s, s.T) / (4. * at)
+    ke_matrix = np.dot(s, s.T) / (4.0 * at)
 
     return ke_matrix
 
 
 def det2x2(s1, s2):
     """ Calculate the determinant of a 2x2 matrix """
-    return s1[0]*s2[1] - s1[1]*s2[0]
+    return s1[0] * s2[1] - s1[1] * s2[0]
 
 
 def _k_tetrahedron(xy):
@@ -495,18 +501,18 @@ def _k_tetrahedron(xy):
     """
     s = xy[[2, 3, 0, 1]] - xy[[1, 2, 3, 0]]
 
-    # volume of the tetrahedron
-    # TODO: remove abs, user must make sure all tetrahedrons are CCW.
-    vt = np.abs(1./6 * la.det(s[[0, 1, 2]]))
+    # volume of the tetrahedron, Note abs is removed since version 2020,
+    # user must make sure all tetrahedrons are CCW (counter clock wised).
+    vt = 1.0 / 6 * la.det(s[[0, 1, 2]])
 
     # calculate area (vector) of triangle faces
     # re-normalize using alternative (+,-) signs
     ij_pairs = [[0, 1], [1, 2], [2, 3], [3, 0]]
     signs = [1, -1, 1, -1]
-    a = [sign*np.cross(s[i], s[j]) for (i, j), sign in zip(ij_pairs, signs)]
+    a = [sign * np.cross(s[i], s[j]) for (i, j), sign in zip(ij_pairs, signs)]
     a = np.array(a)
 
     # local (e for element) stiffness matrix
-    ke_matrix = np.dot(a, a.transpose()) / (36. * vt)
+    ke_matrix = np.dot(a, a.transpose()) / (36.0 * vt)
 
     return ke_matrix

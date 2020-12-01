@@ -1,5 +1,5 @@
 # coding: utf-8
-# pylint: disable=invalid-name, no-member, too-many-arguments
+# pylint: disable=invalid-name, no-member, arguments-differ
 """ dynamic EIT solver using SVD """
 # Copyright (c) Benyuan Liu. All Rights Reserved.
 # Distributed under the (new) BSD License. See LICENSE.txt for more info.
@@ -13,9 +13,9 @@ from .jac import JAC
 class SVD(JAC):
     """ implementing a sensitivity-based EIT imaging class """
 
-    def setup(self, n=25, rcond=1e-2, method='svd'):
+    def setup(self, n=25, rcond=1e-2, method="svd"):
         """
-        SVD, default file parser is 'std'
+        SVD, singular value decomposition based reconstruction.
 
         Parameters
         ----------
@@ -32,14 +32,10 @@ class SVD(JAC):
         n_ord = np.min([nm, ne, n])
 
         # passing imaging parameters
-        self.params = {
-            'n': n_ord,
-            'rcond': rcond,
-            'method': method
-        }
+        self.params = {"n": n_ord, "rcond": rcond, "method": method}
 
         # pre-compute H0 for dynamical imaging
-        if method == 'svd':
+        if method == "svd":
             JtJ = np.dot(self.J.T, self.J)
 
             # using svd
@@ -54,7 +50,7 @@ class SVD(JAC):
             U = U[:, idx[:n_ord]]
 
             # pseudo inverse
-            JtJ_inv = np.dot(U, np.dot(np.diag(s**-1), U.T))
+            JtJ_inv = np.dot(U, np.dot(np.diag(s ** -1), U.T))
             self.H = np.dot(JtJ_inv, self.J.T)
-        elif method == 'pinv':
+        elif method == "pinv":
             self.H = np.linalg.pinv(self.J, rcond=rcond)

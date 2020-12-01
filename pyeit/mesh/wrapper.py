@@ -10,11 +10,11 @@ import numpy as np
 from .distmesh import build
 from .mesh_circle import MeshCircle
 from .utils import check_order
-from .shape import circle, ball, area_uniform
+from .shape import circle, area_uniform
 from .shape import fix_points_fd, fix_points_ball
 
 
-def create(n_el=16, fd=None, fh=None, p_fix=None, bbox=None, h0=0.1):
+def create(n_el=16, fd=circle, fh=area_uniform, h0=0.1, p_fix=None, bbox=None):
     """
     Generating 2D/3D meshes using distmesh (pyEIT built-in)
 
@@ -23,7 +23,7 @@ def create(n_el=16, fd=None, fh=None, p_fix=None, bbox=None, h0=0.1):
     n_el: int
         number of electrodes (point-type electrode)
     fd: function
-        distance function
+        distance function (circle in 2D, ball in 3D)
     fh: function
         mesh size quality control function
     p_fix: NDArray
@@ -38,29 +38,20 @@ def create(n_el=16, fd=None, fh=None, p_fix=None, bbox=None, h0=0.1):
     mesh_obj: dict
         {'element', 'node', 'perm'}
     """
-    if bbox is None:
-        bbox = [[-1, -1], [1, 1]]
     # infer dim
-    bbox = np.array(bbox)
+    if bbox is None:
+        bbox = np.array([[-1, -1], [1, 1]])
     n_dim = bbox.shape[1]
     if n_dim not in [2, 3]:
-        raise TypeError('distmesh only supports 2D or 3D')
+        raise TypeError("distmesh only supports 2D or 3D")
     if bbox.shape[0] != 2:
-        raise TypeError('please specify lower and upper bound of bbox')
+        raise TypeError("please specify lower and upper bound of bbox")
 
-    if n_dim == 2:
-        if fd is None:
-            fd = circle
-        if p_fix is None:
+    if p_fix is None:
+        if n_dim == 2:
             p_fix = fix_points_fd(fd, n_el=n_el)
-    elif n_dim == 3:
-        if fd is None:
-            fd = ball
-        if p_fix is None:
+        elif n_dim == 3:
             p_fix = fix_points_ball(n_el=n_el)
-
-    if fh is None:
-        fh = area_uniform
 
     # 1. build mesh
     p, t = build(fd, fh, pfix=p_fix, bbox=bbox, h0=h0)
@@ -71,14 +62,12 @@ def create(n_el=16, fd=None, fh=None, p_fix=None, bbox=None, h0=0.1):
     # 4. init uniform element permittivity (sigma)
     perm = np.ones(t.shape[0], dtype=np.float)
     # 5. build output structure
-    mesh = {'element': t,
-            'node': p,
-            'perm': perm}
+    mesh = {"element": t, "node": p, "perm": perm}
     return mesh, el_pos
 
 
 def set_perm(mesh, anomaly=None, background=None):
-    """ wrapper for pyEIT interface
+    """wrapper for pyEIT interface
 
     Note
     ----
@@ -101,9 +90,9 @@ def set_perm(mesh, anomaly=None, background=None):
     mesh_obj: dict
         updated mesh structure, {'element', 'node', 'perm'}
     """
-    pts = mesh['element']
-    tri = mesh['node']
-    perm = mesh['perm'].copy()
+    pts = mesh["element"]
+    tri = mesh["node"]
+    perm = mesh["perm"].copy()
     tri_centers = np.mean(tri[pts], axis=1)
 
     # this code is equivalent to:
@@ -111,7 +100,7 @@ def set_perm(mesh, anomaly=None, background=None):
     # >>> for i in range(N):
     # >>>     tri_centers[i] = np.mean(pts[tri[i]], axis=0)
     # >>> plt.plot(tri_centers[:,0], tri_centers[:,1], 'kx')
-    n = np.size(mesh['perm'])
+    n = np.size(mesh["perm"])
 
     # reset background if needed
     if background is not None:
@@ -120,28 +109,36 @@ def set_perm(mesh, anomaly=None, background=None):
     # change dtype to 'complex' for complex-valued permittivity
     if anomaly is not None:
         for attr in anomaly:
-            if np.iscomplex(attr['perm']):
-                perm = perm.astype('complex')
+            if np.iscomplex(attr["perm"]):
+                perm = perm.astype("complex")
                 break
 
     # assign anomaly values (for elements in regions)
     if anomaly is not None:
         for _, attr in enumerate(anomaly):
-            d = attr['d']
+            d = attr["d"]
             # find elements whose distance to (cx,cy) is smaller than d
-            if 'z' in attr:
-                index = np.sqrt((tri_centers[:, 0] - attr['x'])**2 +
-                                (tri_centers[:, 1] - attr['y'])**2 +
-                                (tri_centers[:, 2] - attr['z'])**2) < d
+            if "z" in attr:
+                index = (
+                    np.sqrt(
+                        (tri_centers[:, 0] - attr["x"]) ** 2
+                        + (tri_centers[:, 1] - attr["y"]) ** 2
+                        + (tri_centers[:, 2] - attr["z"]) ** 2
+                    )
+                    < d
+                )
             else:
-                index = np.sqrt((tri_centers[:, 0] - attr['x'])**2 +
-                                (tri_centers[:, 1] - attr['y'])**2) < d
+                index = (
+                    np.sqrt(
+                        (tri_centers[:, 0] - attr["x"]) ** 2
+                        + (tri_centers[:, 1] - attr["y"]) ** 2
+                    )
+                    < d
+                )
             # update permittivity within indices
-            perm[index] = attr['perm']
+            perm[index] = attr["perm"]
 
-    mesh_new = {'node': tri,
-                'element': pts,
-                'perm': perm}
+    mesh_new = {"node": tri, "element": pts, "perm": perm}
     return mesh_new
 
 
@@ -151,7 +148,5 @@ def layer_circle(n_el=16, n_fan=8, n_layer=8):
     p, e, el_pos = model.create()
     perm = np.ones(e.shape[0])
 
-    mesh = {'element': e,
-            'node': p,
-            'perm': perm}
+    mesh = {"element": e, "node": p, "perm": perm}
     return mesh, el_pos

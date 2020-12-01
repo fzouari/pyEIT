@@ -23,8 +23,7 @@ from .interp2d import meshgrid, weight_sigmod
 class GREIT(EitBase):
     """ The GREIT algorithm """
 
-    def setup(self, method='dist', w=None, p=0.20, lamb=1e-2,
-              n=32, s=20., ratio=0.1):
+    def setup(self, method="dist", w=None, p=0.20, lamb=1e-2, n=32, s=20.0, ratio=0.1):
         """
         setup GREIT
 
@@ -50,51 +49,36 @@ class GREIT(EitBase):
         [1] Bartlomiej Grychtol, Beat Muller, Andy Adler
             "3D EIT image reconstruction with GREIT"
         [2] Adler, Andy, et al.
-            "GREIT: a unified approach to 2D linear EIT reconstruction of 
+            "GREIT: a unified approach to 2D linear EIT reconstruction of
             lung images." Physiological measurement 30.6 (2009): S35.
         """
         # parameters for GREIT projection
         if w is None:
-            w = np.ones_like(self.mesh['perm'])
-        self.params = {
-            'w': w,
-            'p': p,
-            'lamb': lamb,
-            'n': n,
-            's': s,
-            'ratio': ratio
-        }
+            w = np.ones_like(self.mesh["perm"])
+        self.params = {"w": w, "p": p, "lamb": lamb, "n": n, "s": s, "ratio": ratio}
         # action (currently only support 'dist')
-        if method == 'dist':
+        if method == "dist":
             w_mat, self.xg, self.yg, self.mask = self._build_grid()
             self.H = self._build_dist(w_mat)
         else:
-            raise ValueError('method ' + method + ' not supported yet')
+            raise ValueError("method " + method + " not supported yet")
 
-    def solve(self, v1, v0, normalize=False):
-        """ solving and interpolating (psf convolve) on grids. """
-        if normalize:
-            dv = self.normalize(v1, v0)
-        else:
-            dv = (v1 - v0)
-
-        return -np.dot(self.H, dv)
-
-    def map(self, v):
+    def map(self, dv):
         """ return H*v """
-        return -np.dot(self.H, v)
+        return -np.dot(self.H, dv)
 
     def _build_dist(self, w_mat):
         """ generate R using distribution method. """
-        lamb, p = self.params['lamb'], self.params['p']
+        lamb, p = self.params["lamb"], self.params["p"]
 
-        f = self.fwd.solve_eit(self.ex_mat, step=self.step, perm=self.perm,
-                               parser=self.parser)
+        f = self.fwd.solve_eit(
+            self.ex_mat, step=self.step, perm=self.perm, parser=self.parser
+        )
         jac = f.jac
         # E[yy^T], it is more efficient to use left pinv than right pinv
         j_j_w = np.dot(jac, jac.T)
         r_mat = np.diag(np.diag(j_j_w) ** p)
-        jac_inv = la.inv(j_j_w + lamb*r_mat)
+        jac_inv = la.inv(j_j_w + lamb * r_mat)
         # RM = E[xx^T] / E[yy^T]
         h_mat = np.dot(np.dot(w_mat.T, jac.T), jac_inv)
 
@@ -103,13 +87,13 @@ class GREIT(EitBase):
     def _build_grid(self):
         """ build grids and mask """
         # initialize grids
-        n = self.params['n']
+        n = self.params["n"]
         xg, yg, mask = meshgrid(self.pts, n=n)
         # mapping from values on triangles to values on grids
         xy = np.mean(self.pts[self.tri], axis=1)
         xyi = np.vstack((xg.flatten(), yg.flatten())).T
         # GREIT is using sigmod as weighting function (global)
-        ratio, s = self.params['ratio'], self.params['s']
+        ratio, s = self.params["ratio"], self.params["s"]
         w_mat = weight_sigmod(xy, xyi, ratio=ratio, s=s)
         return w_mat, xg, yg, mask
 
