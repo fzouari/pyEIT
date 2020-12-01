@@ -6,7 +6,6 @@ from __future__ import division, absolute_import, print_function
 
 # numeric
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
@@ -22,8 +21,8 @@ mesh_obj, el_pos = mesh.layer_circle(n_layer=8, n_fan=6)
 # mesh_obj, el_pos = mesh.create()
 
 # extract node, element, alpha
-pts = mesh_obj['node']
-tri = mesh_obj['element']
+pts = mesh_obj["node"]
+tri = mesh_obj["element"]
 x, y = pts[:, 0], pts[:, 1]
 quality.stats(pts, tri)
 
@@ -34,7 +33,7 @@ def calc_sens(fwd, ex_mat):
     Electrical Impedance Tomography: Tissue Properties to Image Measures
     """
     # solving EIT problem
-    p = fwd.solve_eit(ex_mat=ex_mat, parser='fmmu')
+    p = fwd.solve_eit(ex_mat=ex_mat, parser="fmmu")
     v0 = p.v
     # normalized jacobian (note: normalize affect sensitivity)
     v0 = v0[:, np.newaxis]
@@ -43,7 +42,7 @@ def calc_sens(fwd, ex_mat):
     s = np.linalg.norm(jac, axis=0)
     ae = tri_area(pts, tri)
     s = np.sqrt(s) / ae
-    assert(any(s >= 0))
+    assert any(s >= 0)
 
     se = np.log10(s)
     sn = sim2pts(pts, tri, se)
@@ -59,7 +58,7 @@ N = len(ex_list)
 s = []
 for ex_dist in ex_list:
     ex_mat = eit_scan_lines(16, ex_dist)
-    # TODO: ex_mat can also be stacked, see demo_dynamic_stack.py
+    # Note: ex_mat can also be stacked, see demo_dynamic_stack.py
     s0 = calc_sens(fwd, ex_mat)
     s.append(s0)
 
@@ -73,17 +72,26 @@ for ix in range(N):
     sn = s[ix]
     ex_dist = ex_list[ix]
     # statistics, it seems like ex_dist=4 yields the minimal std
-    std = sp.std(sn)
+    std = np.std(sn)
     print("std (ex_dist=%d) = %f" % (ex_dist, std))
-    im = ax.tripcolor(x, y, tri, sn,
-                      edgecolors='none', shading='gouraud', cmap=plt.cm.Reds,
-                      antialiased=True, vmin=vmin, vmax=vmax)
+    im = ax.tripcolor(
+        x,
+        y,
+        tri,
+        sn,
+        edgecolors="none",
+        shading="gouraud",
+        cmap=plt.cm.Reds,
+        antialiased=True,
+        vmin=vmin,
+        vmax=vmax,
+    )
     # annotate
-    ax.set_title('ex_dist=' + str(ex_dist))
-    ax.set_aspect('equal')
+    ax.set_title("ex_dist=" + str(ex_dist))
+    ax.set_aspect("equal")
     ax.set_ylim([-1.2, 1.2])
     ax.set_xlim([-1.2, 1.2])
-    ax.axis('off')
+    ax.axis("off")
     plt.colorbar(im)
 
 # fig.savefig('demo_sens.png', dpi=96)
