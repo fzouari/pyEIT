@@ -12,10 +12,12 @@ import scipy.linalg as la
 
 from .base import EitBase
 
+from functools import lru_cache
 
 class JAC(EitBase):
     """ A sensitivity-based EIT imaging class """
 
+    @lru_cache(maxsize=10)
     def setup(self, p=0.20, lamb=0.001, method='kotre'):
         """
         JAC, default file parser is 'std'
@@ -170,11 +172,12 @@ class JAC(EitBase):
             convergence.append(c)
             r2i.append(r2)
 
-            if c < gtol:
-                break
-
             if verbose:
                 print('iter = %d, lamb = %f, gtol = %f, r2 = %f' % (i, lamb, c, r2))
+
+            if c < gtol:
+                print("Converged {} < {}".format(c, gtol))
+                break
 
             # update regularization parameter
             # TODO: support user defined decreasing order of lambda series

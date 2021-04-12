@@ -391,7 +391,7 @@ def build(fd, fh, pfix=None, bbox=None, h0=0.1,
     # now iterate to push to equilibrium
     for i in range(maxiter):
         if dm.is_retriangulate():
-            print("triangulate = %d" % dm.num_triangulate)
+            # print("triangulate = %d" % dm.num_triangulate)
             dm.triangulate()
 
         # calculate bar forces
