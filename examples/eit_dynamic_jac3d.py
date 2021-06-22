@@ -6,13 +6,13 @@ from __future__ import division, absolute_import, print_function
 
 import numpy as np
 
-import pyeit.mesh as mesh
-from pyeit.mesh import quality
-import pyeit.mesh.plot as mplot
-from pyeit.eit.fem import Forward
-from pyeit.eit.interp2d import sim2pts
-from pyeit.eit.utils import eit_scan_lines
-import pyeit.eit.jac as jac
+import lung_sop.pyEIT.pyeit.mesh as mesh
+from lung_sop.pyEIT.pyeit.mesh import quality
+import lung_sop.pyEIT.pyeit.mesh.plot as mplot
+from lung_sop.pyEIT.pyeit.eit.fem import Forward
+from lung_sop.pyEIT.pyeit.eit.interp2d import sim2pts
+from lung_sop.pyEIT.pyeit.eit.utils import eit_scan_lines
+import lung_sop.pyEIT.pyeit.eit.jac as jac
 
 # build tetrahedron
 # 3D tetrahedron must have a bbox

@@ -16,7 +16,7 @@ from vispy import app, gloo, scene
 from vispy.visuals import Visual
 
 #
-from pyeit.mesh.plot.simconv import sim2edge, sim2tri
+from lung_sop.pyEIT.pyeit.mesh.plot.simconv import sim2edge, sim2tri
 
 # build vertex shader for tetplot
 vert = """

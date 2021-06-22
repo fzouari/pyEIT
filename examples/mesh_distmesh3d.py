@@ -6,8 +6,8 @@
 from __future__ import division, absolute_import, print_function
 import numpy as np
 
-import pyeit.mesh as mesh
-import pyeit.mesh.plot as mplot
+import lung_sop.pyEIT.pyeit.mesh as mesh
+import lung_sop.pyEIT.pyeit.mesh.plot as mplot
 
 # tetrahedron meshing in a 3D bbox
 bbox = [[-1.2, -1.2, -1.2], [1.2, 1.2, 1.2]]

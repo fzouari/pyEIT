@@ -13,7 +13,7 @@ from matplotlib.path import Path
 import matplotlib.pyplot as plt
 
 # for debugging
-from pyEIT.pyeit.mesh import layer_circle, set_perm
+from lung_sop.pyEIT.pyeit.mesh import layer_circle, set_perm
 
 
 def meshgrid(pts, n=32, ext_ratio=0, gc=False):

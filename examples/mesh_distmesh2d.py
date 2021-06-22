@@ -8,9 +8,9 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pyeit.mesh import shape
-from pyeit.mesh import distmesh
-from pyeit.mesh.plot import voronoi_plot
+from lung_sop.pyEIT.pyeit.mesh import shape
+from lung_sop.pyEIT.pyeit.mesh import distmesh
+from lung_sop.pyEIT.pyeit.mesh.plot import voronoi_plot
 
 
 def example1():

@@ -5,8 +5,8 @@ Dynamic EIT imaging and information retrieval from EIT images
 """
 # Copyright (c) Benyuan Liu. All Rights Reserved.
 # Distributed under the (new) BSD License. See LICENSE.txt for more info.
-from pyeit.eit import bp
-from pyeit.eit import jac
+from lung_sop.pyEIT.pyeit.eit import bp
+from lung_sop.pyEIT.pyeit.eit import jac
 
 
 class DynamicEIT:

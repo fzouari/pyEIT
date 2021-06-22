@@ -8,10 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # pyEIT 2D algorithm modules
-import pyeit.mesh as mesh
-from pyeit.eit.fem import Forward
-from pyeit.eit.utils import eit_scan_lines
-import pyeit.eit.jac as jac
+import lung_sop.pyEIT.pyeit.mesh as mesh
+from lung_sop.pyEIT.pyeit.eit.fem import Forward
+from lung_sop.pyEIT.pyeit.eit.utils import eit_scan_lines
+import lung_sop.pyEIT.pyeit.eit.jac as jac
 
 """ 1. setup """
 mesh_obj, el_pos = mesh.create(16)

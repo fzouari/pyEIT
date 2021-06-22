@@ -10,11 +10,11 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
 # pyEIT
-import pyeit.mesh as mesh
-from pyeit.eit.interp2d import tri_area, sim2pts
-from pyeit.mesh import quality
-from pyeit.eit.fem import Forward
-from pyeit.eit.utils import eit_scan_lines
+import lung_sop.pyEIT.pyeit.mesh as mesh
+from lung_sop.pyEIT.pyeit.eit.interp2d import tri_area, sim2pts
+from lung_sop.pyEIT.pyeit.mesh import quality
+from lung_sop.pyEIT.pyeit.eit.fem import Forward
+from lung_sop.pyEIT.pyeit.eit.utils import eit_scan_lines
 
 """ 0. build mesh """
 mesh_obj, el_pos = mesh.layer_circle(n_layer=8, n_fan=6)

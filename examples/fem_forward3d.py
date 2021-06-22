@@ -5,12 +5,12 @@
 from __future__ import division, absolute_import, print_function
 import numpy as np
 
-import pyeit.mesh as mesh
-from pyeit.mesh import quality
-import pyeit.mesh.plot as mplot
-from pyeit.eit.fem import Forward
-from pyeit.eit.interp2d import sim2pts
-from pyeit.eit.utils import eit_scan_lines
+import lung_sop.pyEIT.pyeit.mesh as mesh
+from lung_sop.pyEIT.pyeit.mesh import quality
+import lung_sop.pyEIT.pyeit.mesh.plot as mplot
+from lung_sop.pyEIT.pyeit.eit.fem import Forward
+from lung_sop.pyEIT.pyeit.eit.interp2d import sim2pts
+from lung_sop.pyEIT.pyeit.eit.utils import eit_scan_lines
 
 # tetrahedron meshing in a 3D bbox
 bbox = [[-1, -1, -1], [1, 1, 1]]

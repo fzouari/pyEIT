@@ -12,14 +12,14 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
 # pyEIT 2D algorithm modules
-import pyeit.mesh as mesh
-from pyeit.eit.fem import Forward
-from pyeit.eit.interp2d import sim2pts
-from pyeit.eit.utils import eit_scan_lines
+import lung_sop.pyEIT.pyeit.mesh as mesh
+from lung_sop.pyEIT.pyeit.eit.fem import Forward
+from lung_sop.pyEIT.pyeit.eit.interp2d import sim2pts
+from lung_sop.pyEIT.pyeit.eit.utils import eit_scan_lines
 
-import pyeit.eit.greit as greit
-import pyeit.eit.bp as bp
-import pyeit.eit.jac as jac
+import lung_sop.pyEIT.pyeit.eit.greit as greit
+import lung_sop.pyEIT.pyeit.eit.bp as bp
+import lung_sop.pyEIT.pyeit.eit.jac as jac
 
 """ 0. construct mesh structure """
 mesh_obj, el_pos = mesh.create(16, h0=0.08)

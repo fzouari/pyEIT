@@ -7,12 +7,12 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
-import pyeit.mesh as mesh
-from pyeit.eit.fem import Forward
-from pyeit.eit.utils import eit_scan_lines
+import lung_sop.pyEIT.pyeit.mesh as mesh
+from lung_sop.pyEIT.pyeit.eit.fem import Forward
+from lung_sop.pyEIT.pyeit.eit.utils import eit_scan_lines
 
-import pyeit.eit.svd as svd
-from pyeit.eit.interp2d import sim2pts
+import lung_sop.pyEIT.pyeit.eit.svd as svd
+from lung_sop.pyEIT.pyeit.eit.interp2d import sim2pts
 
 """ 0. construct mesh """
 mesh_obj, el_pos = mesh.create(16, h0=0.1)

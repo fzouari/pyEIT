@@ -10,7 +10,7 @@ from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 
 from pkg_resources import resource_filename
-from pyeit.io import mes
+from lung_sop.pyEIT.pyeit.io import mes
 
 
 class SimpleMeshGeometry:

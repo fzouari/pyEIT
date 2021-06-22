@@ -8,9 +8,9 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pyeit.mesh import multi_shell, multi_circle
-from pyeit.eit.fem import Forward
-from pyeit.eit.utils import eit_scan_lines
+from lung_sop.pyEIT.pyeit.mesh import multi_shell, multi_circle
+from lung_sop.pyEIT.pyeit.eit.fem import Forward
+from lung_sop.pyEIT.pyeit.eit.utils import eit_scan_lines
 
 
 # (a) using multi-shell (calls layer_circle, fast, inaccurate)

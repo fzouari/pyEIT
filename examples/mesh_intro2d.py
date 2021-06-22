@@ -7,8 +7,8 @@ from __future__ import division, absolute_import, print_function
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pyeit.mesh import wrapper
-from pyeit.eit.interp2d import sim2pts
+from lung_sop.pyEIT.pyeit.mesh import wrapper
+from lung_sop.pyEIT.pyeit.eit.interp2d import sim2pts
 
 """ 0. create mesh """
 mesh_obj, el_pos = wrapper.create(16, h0=0.1)
