@@ -57,16 +57,12 @@ class DAEGER_EIT:
                     fmt = int(cell[1])
         # failed to find valid parameters
         if fr == 0:
-            print("Frame rate could not be read, setting to 20")
             fr = 20
         if fmt == 0:
-            print("Format could not be read, setting to 51")
             fmt = 51
 
         # find spc: bytes per frame
         daeger_spc = dict({31: 4112, 32: 3200, 51: 5495})
-        if fmt not in daeger_spc.keys():
-            print("Error, format version={} not supported".format(fmt))
         spc = daeger_spc[fmt]
 
         # get file length
@@ -122,6 +118,5 @@ class DAEGER_EIT:
 if __name__ == "__main__":
     file_name = r"./ID_SC_10_001.eit"
     model = DAEGER_EIT(fname=file_name)
-    print(model.info)
     # test loading from daeger EIT
     model.load()

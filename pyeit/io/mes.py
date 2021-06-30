@@ -165,8 +165,6 @@ if __name__ == "__main__":
 
     # print the size
     e, pts = mesh_obj["element"], mesh_obj["node"]
-    # print('tri size = (%d, %d)' % e.shape)
-    # print('pts size = (%d, %d)' % pts.shape)
 
     # show mesh
     fig, ax = plt.subplots(1, figsize=(6, 6))

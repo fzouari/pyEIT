@@ -193,9 +193,6 @@ class ET3:
         ts = pd.to_datetime(rel_date) + pd.to_timedelta(d_seconds, "s")
 
         # check duplicated
-        if any(ts.duplicated()):
-            print("{}: duplicated datetime:".format(self.file_name))
-            print(ts[ts.duplicated()])
 
         return ts
 
@@ -306,25 +303,21 @@ def parse_header_et0(d):
     parse et0 header. Guess from binary dump (byliu)
     binary dump all (little endian, i.e., LSB 16 bit first):
 
-    print('now dump')
     h_all = np.array(unpack('256I', d))
     for i in range(32):
         h_seg = h_all[i*8 + np.arange(8)]
-        print(','.join('{:02x}'.format(x) for x in h_seg))
 
     current can also be read out in each switches:
 
     header_offset = 84
     h = np.array(unpack('4H', d[header_offset:header_offset+8]))
     nGain, nCurrent = h[1], h[3]
-    print(nGain, nCurrent)
 
     hints on extract date from .et0 file.
     for .et0 file date is stored in string (bytes) format (utf-16, CJK)
     i.e., '2016Y01M01D 11H08M30S', offset=4, length=42 (21*2) Bytes
     """
     h = np.array(unpack("8H", d[48:64]))
-    # print(','.join('{:02x}'.format(x) for x in h))
 
     # extract information in global configurations
     frequency = np.int(h[1])

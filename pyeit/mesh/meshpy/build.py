@@ -144,7 +144,6 @@ if __name__ == "__main__":
     mesh_obj, e_pos = create(16)
 
     # show el_pos
-    print(mesh_obj)
 
     # extract 'node' and 'element'
     p = mesh_obj['node']

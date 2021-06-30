@@ -171,7 +171,6 @@ def demo():
     p, e, el_pos = model.create()
 
     # the order of inner-most triangles
-    print(e[[0, 1, 2]])
 
     _, ax = plt.subplots(figsize=(6, 6))
     ax.plot(p[:, 0], p[:, 1], "ro", markersize=5)

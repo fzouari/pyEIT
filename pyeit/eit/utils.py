@@ -61,4 +61,3 @@ def eit_scan_lines(ne=16, dist=1):
 
 if __name__ == "__main__":
     m = eit_scan_lines(dist=8)
-    print(m)

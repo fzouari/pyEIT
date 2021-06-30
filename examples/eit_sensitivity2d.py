@@ -73,7 +73,6 @@ for ix in range(N):
     ex_dist = ex_list[ix]
     # statistics, it seems like ex_dist=4 yields the minimal std
     std = np.std(sn)
-    print("std (ex_dist=%d) = %f" % (ex_dist, std))
     im = ax.tripcolor(
         x,
         y,

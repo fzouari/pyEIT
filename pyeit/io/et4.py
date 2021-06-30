@@ -172,7 +172,6 @@ def zero_rearrange_index(ex_mtx):
             b = (a + el_dist) % num_el  # negative excitation
         ap = (a - 1) % num_el  # positive adjacent
         bp = (b - 1) % num_el  # negative adjacent
-        # print(A, B, Ap, Bp)
         c_index.append(k * num_el + b)
         for i in range(num_el):
             # re-order data start after A
@@ -192,14 +191,11 @@ if __name__ == "__main__":
     # load data
     et4 = ET4(et_file, compatible=True, output_resistor=False)
     et4_data = et4.data
-    print(et4_data.shape)
 
     ti = et4_data.sum(axis=1) / 192.0
     ti_real = np.real(ti)
     ti_imag = np.imag(ti)
     ti_abs = np.sqrt(ti_real ** 2 + ti_imag ** 2)
-    print("max = ", np.max(ti_abs))
-    print("min = ", np.min(ti_abs))
 
     xlim = 1000
     if ti_abs.shape[0] < 1000:

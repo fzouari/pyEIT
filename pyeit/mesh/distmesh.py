@@ -213,7 +213,6 @@ class DISTMESH:
         """
         self.debug("enter density control = ", self.num_density)
         self.num_density += 1
-        # print(self.num_density, self.p.shape)
         # quality control
         ixout = (L0 > dscale * L).ravel()
         ixdel = np.setdiff1d(self.bars[ixout, :].reshape(-1), np.arange(self.nfix))
@@ -221,7 +220,6 @@ class DISTMESH:
         # Nold = N
         self.N = self.p.shape[0]
         self.pold = np.inf * np.ones((self.N, self.n_dim))
-        # print('density control ratio : %f' % (float(N)/Nold))
 
     def move_p(self, Ftot):
         """ update p """
@@ -413,7 +411,6 @@ def build(
     # now iterate to push to equilibrium
     for i in range(maxiter):
         if dm.is_retriangulate():
-            # print("triangulate = %d" % dm.num_triangulate)
             dm.triangulate()
 
         # calculate bar forces

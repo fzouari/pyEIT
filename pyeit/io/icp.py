@@ -22,7 +22,6 @@ def load(fstr, resample=None):
     # using values to extract data from DataFrame
     icp_data = df["p"].values
     icp_timestmp = df["timestmp"].values
-    # print('file %s size is %d' % (fstr, icp_data.size))
 
     # build a timeseries structure
     ts = pd.Series(icp_data, index=icp_timestmp)
